@@ -7,30 +7,25 @@ import moment from "moment";
 import { useRouter } from "next/router";
 import {capitaliseLine} from '../../utils/textFormatters';
 
-const { serverRuntimeConfig } = getConfig();
 
 const WeatherScreen = () => {
     const router = useRouter();
     const [zipCode, setZipcode] = useState('');
     const [error, setError] = useState('');
     const [weatherData, setWeatherData] = useState(null);
-    const API_KEY  = serverRuntimeConfig.apiKey;
 
     const searchWeather = (zip) => {
-        axios.get(`https://api.openweathermap.org/data/2.5/forecast?zip=${zip}&appid=${API_KEY}&units=metric`)
+        axios.get(`https://api.openweathermap.org/data/2.5/forecast?zip=${zip}&appid=${process.env.apiKey}&units=metric`)
         .then((res) => {
-            console.log('res', res);
             setWeatherData(res.data);
         })
         .catch((error) => {
-            console.log('error', error);
             setError(error.response.data.message);
             setWeatherData(null);
         });
     }
 
     useEffect(() => {
-        console.log('serverRuntimeConfig.apiKey', serverRuntimeConfig.apiKey);
         setZipcode(router.query.zipcode);
         if (router.query.zipcode) {
             searchWeather(router.query.zipcode);
@@ -56,8 +51,9 @@ const WeatherScreen = () => {
                         <h1>{weatherData.city.name}</h1>
                     </div>
                     <div className="weather-details">
-                        {weatherData.list.map((item) => (
+                        {weatherData.list.map((item, idx) => (
                             <WeatherCard
+                                key={idx}
                                 weatherBasics={{
                                     ...item.weather[0],
                                     dt_txt: item.dt_txt,
