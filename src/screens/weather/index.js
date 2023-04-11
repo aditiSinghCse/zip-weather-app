@@ -4,18 +4,20 @@ import SearchBar from '../../components/SearchBar';
 import WeatherCard from '../../components/WeatherCard';
 import getConfig from 'next/config';
 import moment from "moment";
+import { useRouter } from "next/router";
 import {capitaliseLine} from '../../utils/textFormatters';
 
 const { serverRuntimeConfig } = getConfig();
 
 const WeatherScreen = () => {
+    const router = useRouter();
     const [zipCode, setZipcode] = useState('');
     const [error, setError] = useState('');
     const [weatherData, setWeatherData] = useState(null);
     const API_KEY  = serverRuntimeConfig.apiKey;
 
-    const searchWeather = () => {
-        axios.get(`https://api.openweathermap.org/data/2.5/forecast?zip=${zipCode}&appid=${API_KEY}&units=metric`)
+    const searchWeather = (zip) => {
+        axios.get(`https://api.openweathermap.org/data/2.5/forecast?zip=${zip}&appid=${API_KEY}&units=metric`)
         .then((res) => {
             console.log('res', res);
             setWeatherData(res.data);
@@ -27,6 +29,14 @@ const WeatherScreen = () => {
         });
     }
 
+    useEffect(() => {
+        console.log('serverRuntimeConfig.apiKey', serverRuntimeConfig.apiKey);
+        setZipcode(router.query.zipcode);
+        if (router.query.zipcode) {
+            searchWeather(router.query.zipcode);
+        }
+    }, [router.query.zipcode]);
+
     return (
         <>
             <SearchBar searchlabel={'Zip Code:'} placeholder="Search Zipcode" searchValue={zipCode} onTextChange={(zip) => {
@@ -34,7 +44,9 @@ const WeatherScreen = () => {
                     setError('');
                 }
                 setZipcode(zip);
-            }} onSearch={searchWeather} />
+            }} onSearch={() => {
+                router.push(`/weather/${zipCode}`)
+            }} />
             {error && (
                 <div className="city-weather">{capitaliseLine(error)}</div>
             )}
@@ -60,7 +72,7 @@ const WeatherScreen = () => {
                 </div>
             )}
         </>
-    )
+    );
 };
 
 export default WeatherScreen;
