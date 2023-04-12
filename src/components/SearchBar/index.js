@@ -4,7 +4,7 @@ const SearchBar = ({
     searchlabel = '',
     searchValue = '',
     placeholder = 'Search',
-    onTextChange = () => {},
+    onTextChange = (val) => {},
     onSearch = () => {},
 }) => {
     return (
